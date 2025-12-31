@@ -60,7 +60,7 @@ def feature_populator(
             positions[rank] = np.arange(n_items)
             training_dataframe.loc[user_id, f"{algorithm_name}_RankPosition"] = positions[item_list]
 
-        del scores, norm_linf_scores, rank, positions, recommended
+        del scores, norm_linf_scores, rank, positions
         gc.collect()
 
 # 4 & 5 Unificati
