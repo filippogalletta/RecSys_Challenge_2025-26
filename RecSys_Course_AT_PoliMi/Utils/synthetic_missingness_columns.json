@@ -1,0 +1,13 @@
+{
+  "columns": [
+    "x1",
+    "x2",
+    "x3",
+    "y_mcar1",
+    "y_mcar2",
+    "y_mar1",
+    "y_mar2",
+    "y_mnar1",
+    "y_mnar2"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "x1": "none",
+  "x2": "none",
+  "x3": "none",
+  "y_mcar1": "MCAR",
+  "y_mcar2": "MCAR",
+  "y_mar1": "MAR",
+  "y_mar2": "MAR",
+  "y_mnar1": "MNAR",
+  "y_mnar2": "MNAR"
+}
