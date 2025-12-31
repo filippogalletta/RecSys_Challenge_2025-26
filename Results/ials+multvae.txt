@@ -1,0 +1,37 @@
+[I 2025-12-30 15:41:39,982] Trial 94 finished with value: 0.2463840440125984 and parameters: {'alpha': 0.25491773652785565}. Best is trial 93 with value: 0.24647413506727034.
+[0.24642652876622043, 0.24661369669576785, 0.24642570578148948, 0.24644940213705074, 0.24600488668246354]
+EvaluatorHoldout: Processed 27054 (100.0%) in 7.36 sec. Users per second: 3674
+EvaluatorHoldout: Processed 27068 (100.0%) in 7.37 sec. Users per second: 3674
+EvaluatorHoldout: Processed 27059 (100.0%) in 7.37 sec. Users per second: 3672
+EvaluatorHoldout: Processed 27052 (100.0%) in 7.35 sec. Users per second: 3678
+EvaluatorHoldout: Processed 27061 (100.0%) in 7.34 sec. Users per second: 3687
+[I 2025-12-30 15:42:16,843] Trial 95 finished with value: 0.2462606600147353 and parameters: {'alpha': 0.3171882267036719}. Best is trial 93 with value: 0.24647413506727034.
+[0.24627807207743127, 0.24653978076245336, 0.24622892398934462, 0.2462683403709569, 0.2459881828734903]
+EvaluatorHoldout: Processed 27054 (100.0%) in 7.40 sec. Users per second: 3654
+EvaluatorHoldout: Processed 27068 (100.0%) in 7.41 sec. Users per second: 3655
+EvaluatorHoldout: Processed 27059 (100.0%) in 7.40 sec. Users per second: 3658
+EvaluatorHoldout: Processed 27052 (100.0%) in 7.39 sec. Users per second: 3662
+EvaluatorHoldout: Processed 27061 (100.0%) in 7.40 sec. Users per second: 3658
+[I 2025-12-30 15:42:53,899] Trial 96 finished with value: 0.24640439334449993 and parameters: {'alpha': 0.20229894270711463}. Best is trial 93 with value: 0.24647413506727034.
+[0.24655658092604307, 0.24650305760080973, 0.24621333698524697, 0.2464872567080457, 0.24626173450235414]
+EvaluatorHoldout: Processed 27054 (100.0%) in 7.39 sec. Users per second: 3661
+EvaluatorHoldout: Processed 27068 (100.0%) in 7.38 sec. Users per second: 3669
+EvaluatorHoldout: Processed 27059 (100.0%) in 7.35 sec. Users per second: 3683
+EvaluatorHoldout: Processed 27052 (100.0%) in 7.37 sec. Users per second: 3671
+EvaluatorHoldout: Processed 27061 (100.0%) in 7.36 sec. Users per second: 3677
+[I 2025-12-30 15:43:30,809] Trial 97 finished with value: 0.2462582137095506 and parameters: {'alpha': 0.2888250793868411}. Best is trial 93 with value: 0.24647413506727034.
+[0.2462142377213918, 0.24647122936846289, 0.24637841999318988, 0.24635021432416773, 0.24587696714054072]
+EvaluatorHoldout: Processed 27054 (100.0%) in 7.43 sec. Users per second: 3639
+EvaluatorHoldout: Processed 27068 (100.0%) in 7.42 sec. Users per second: 3648
+EvaluatorHoldout: Processed 27059 (100.0%) in 7.40 sec. Users per second: 3657
+EvaluatorHoldout: Processed 27052 (100.0%) in 7.42 sec. Users per second: 3647
+EvaluatorHoldout: Processed 27061 (100.0%) in 7.42 sec. Users per second: 3649
+[I 2025-12-30 15:44:07,963] Trial 98 finished with value: 0.24628817130881134 and parameters: {'alpha': 0.15965145269321784}. Best is trial 93 with value: 0.24647413506727034.
+[0.24635547453669127, 0.24638582032065529, 0.24620508895365886, 0.24643938670090598, 0.24605508603214538]
+EvaluatorHoldout: Processed 27054 (100.0%) in 7.41 sec. Users per second: 3653
+EvaluatorHoldout: Processed 27068 (100.0%) in 7.42 sec. Users per second: 3650
+EvaluatorHoldout: Processed 27059 (100.0%) in 7.39 sec. Users per second: 3661
+EvaluatorHoldout: Processed 27052 (100.0%) in 7.40 sec. Users per second: 3653
+EvaluatorHoldout: Processed 27061 (100.0%) in 7.40 sec. Users per second: 3657
+[I 2025-12-30 15:44:45,047] Trial 99 finished with value: 0.24637311412835122 and parameters: {'alpha': 0.1865773559383464}. Best is trial 93 with value: 0.24647413506727034.
+[0.24645826533486753, 0.24648334789432377, 0.2462249249057928, 0.24654373667546403, 0.2461552958313078]
