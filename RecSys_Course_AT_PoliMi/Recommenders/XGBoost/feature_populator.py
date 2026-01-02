@@ -24,8 +24,6 @@ def feature_populator(
     other_algorithms: dict[str, RecommenderModel], # dizionario other_algorithms
     cutoff: int,
     ):
-    
-    cutoff = 50
 
     # feature_populator(URM, linear_comb_rec, other_algorithms, cutoff = 50
     
