@@ -24,6 +24,8 @@ def feature_populator(
     other_algorithms: dict[str, RecommenderModel], # dizionario other_algorithms
     cutoff: int,
     ):
+    
+    cutoff = 50
 
     # feature_populator(URM, linear_comb_rec, other_algorithms, cutoff = 50
     
@@ -39,30 +41,54 @@ def feature_populator(
         recommendations = candidate_generator.recommend(user_id, cutoff = cutoff)
         training_dataframe.loc[user_id, "ItemID"] = recommendations  
 
+
+    """for user_id in tqdm(range(n_users)):    
+    recommendations = candidate_generator_recommender.recommend(user_id, cutoff = cutoff)
+    # inserting the recommendations (n = cutoff) into the dataframe
+    training_dataframe.loc[user_id, "ItemID"] = recommendations
+    """
+
     training_dataframe = training_dataframe.explode("ItemID")
+
+    """# -----------------------------------------------------------
+    # OPERAZIONI CHE NON VOGLIO FARE
+    URM_validation_coo = sps.coo_matrix(URM_validation)
+
+    correct_recommendations = pd.DataFrame({"UserID": URM_validation_coo.row,
+                                        "ItemID": URM_validation_coo.col})
+    
+    training_dataframe = pd.merge(training_dataframe, correct_recommendations, on=['UserID','ItemID'], how='left', indicator='Exist')
+    training_dataframe["Label"] = training_dataframe["Exist"] == "both"
+    training_dataframe.drop(columns = ['Exist'], inplace=True)
+    # -----------------------------------------------------------"""
+
+
 
     #3 
     print('---------------3---------------')
 
     for algorithm_name, recommender in tqdm(other_algorithms.items()):
         scores = recommender._compute_item_score(np.arange(n_users))
-        norm_linf_scores = scores / (LA.norm(scores, np.inf, axis=1, keepdims=True) + 1e-6)
+        linf_scores = scores / (LA.norm(scores, np.inf, axis=1, keepdims=True) + 1e-6)
 
         for user_id in tqdm(range(n_users)):
             item_list = training_dataframe.loc[user_id, "ItemID"].values.tolist()
-            norm_linf_scores[user_id, :] = recommender._remove_seen_on_scores(user_id, norm_linf_scores[user_id, :])
-            training_dataframe.loc[user_id, f"{algorithm_name}_Score"] = norm_linf_scores[user_id, item_list]
+            linf_scores[user_id, :] = recommender._remove_seen_on_scores(user_id, linf_scores[user_id, :])
+            training_dataframe.loc[user_id, f"{algorithm_name}_Score"] = linf_scores[user_id, item_list]
 
-            rank = np.argsort(norm_linf_scores[user_id, :])[::-1]
+            rank = np.argsort(linf_scores[user_id, :])[::-1]
             positions = np.zeros(n_items, dtype=int)
             positions[rank] = np.arange(n_items)
             training_dataframe.loc[user_id, f"{algorithm_name}_RankPosition"] = positions[item_list]
 
-        del scores, norm_linf_scores, rank, positions
+            recommended = np.isin(item_list, rank[:10], assume_unique=True)
+            training_dataframe.loc[user_id, f"{algorithm_name}_Recommended"] = recommended.astype(int)
+
+        del scores, linf_scores, rank, positions, recommended
         gc.collect()
 
 # 4 & 5 Unificati
-    print('--------------- 4 ---------------')
+    print('--------------- Similarity Features (SLIM & RP3) ---------------')
 
     # Dizionario: {'NomeChiaveNelDict': 'SuffissoColonna'}
     similarity_models = {
@@ -79,6 +105,7 @@ def feature_populator(
             
         print(f"Processing {algo_name}...")
         
+        # Attenzione: .toarray() su matrici grandi può riempire la RAM
         item_item_S = other_algorithms[algo_name].W_sparse.toarray()
         
         col_names = {
@@ -87,7 +114,7 @@ def feature_populator(
             'min': f"MinSimilarityToSeen{suffix}",
             'std': f"StdSimilarityToSeen{suffix}",
             'skew': f"SkewSimilarityToSeen{suffix}",
-            'kurtosis': f"KurtosisSimilarityToSeen{suffix}"
+            'kurt': f"KurtosisSimilarityToSeen{suffix}"
         }
 
         # Iterazione utenti
@@ -100,7 +127,7 @@ def feature_populator(
                 training_dataframe.loc[user_id, col_names['min']] = 0
                 training_dataframe.loc[user_id, col_names['std']] = 0
                 training_dataframe.loc[user_id, col_names['skew']] = 0
-                training_dataframe.loc[user_id, col_names['kurtosis']] = 0
+                training_dataframe.loc[user_id, col_names['kurt']] = 0
             else:
                 # Estrazione candidati per l'utente corrente
                 candidate_items = training_dataframe.loc[user_id, "ItemID"].values.astype(int)
@@ -114,7 +141,7 @@ def feature_populator(
                 training_dataframe.loc[user_id, col_names['min']] = similarities.min(axis=1).flatten()
                 training_dataframe.loc[user_id, col_names['std']] = similarities.std(axis=1).flatten()
                 training_dataframe.loc[user_id, col_names['skew']] = stats.skew(similarities, axis=1)
-                training_dataframe.loc[user_id, col_names['kurtosis']] = stats.kurtosis(similarities, axis=1)
+                training_dataframe.loc[user_id, col_names['kurt']] = stats.kurtosis(similarities, axis=1)
 
         # Pulizia memoria fondamentale dentro il loop
         del item_item_S
@@ -152,17 +179,19 @@ def feature_populator(
     training_dataframe['mainstream_item'] = mainstream_item[training_dataframe["ItemID"].values.astype(int)]
     training_dataframe
 
-    # ------------- 5 ------------
-    print('--------------- 5 ---------------')
+    # ------------- nuove features by gem ------------
+    print('---------------new features by gemini---------------')
     u_factors = other_algorithms['IALS'].USER_factors
     i_factors = other_algorithms['IALS'].ITEM_factors
 
-    # Prendiamo le prime n dimensioni 
+    # Prendiamo le prime n dimensioni (es. 3 o 5 per non esplodere le feature)
     n_latent = 5 
 
+    # Creiamo i nomi delle colonne
     u_cols = [f"IALS_User_Latent_{i}" for i in range(n_latent)]
     i_cols = [f"IALS_Item_Latent_{i}" for i in range(n_latent)]
 
+    # Mappiamo i fattori nel dataframe
     # User Factors
     user_factors_df = pd.DataFrame(u_factors[:, :n_latent], columns=u_cols)
     user_factors_df['UserID'] = np.arange(n_users)
@@ -178,14 +207,16 @@ def feature_populator(
     score_cols = [c for c in training_dataframe.columns if c.endswith('_Score')]
 
     # Varianza dei Rank (Disaccordo tra i modelli)
+    # Se la varianza è alta, i modelli non sono d'accordo sull'item
     training_dataframe['Rank_Variance'] = training_dataframe[rank_cols].var(axis=1)
+
 
     # Calcolo Popolarità Globale degli Item
     item_pop = np.ediff1d(sps.csc_matrix(URM).indptr)
     item_pop = item_pop / item_pop.max() # Normalizzazione
 
     # Vettorializzazione: Calcolo media e varianza popolarità per utente usando algebra lineare
-    # più veloce di un for
+    # Questo è molto più veloce di un ciclo for
 
     # 1. Somma delle popolarità degli item visti dall'utente
     user_pop_sum = URM.dot(item_pop)
@@ -224,7 +255,7 @@ def feature_populator(
     # L'utente sta guardando qualcosa di molto più popolare o di nicchia rispetto al suo solito?
     training_dataframe['Pop_Diff_Item_UserAvg'] = training_dataframe['item_popularity'] - training_dataframe['User_Avg_Item_Popularity']
 
-    # ------------- Embeddings ScaledPureSVD  -------------
+    # ------------- new feature: Embeddings ScaledPureSVD  -------------
     print('--------------- ScaledPureSVD Embeddings ---------------')
     
     # Verifica che il modello sia presente
@@ -266,9 +297,12 @@ def feature_populator(
         print("ScaledPureSVD model not found in other_algorithms.")
 
 
-    # -------------- another new one with gemini --------------
+    # ------------------------------ another new one with gemini -------------------------------------------
+    # 3. Score Ratios & Rank Differences (Strategic Pairs Only)
     print('--------------- Score Ratios & Rank Differences ---------------')
     
+
+    # Definiamo manualmente le coppie che vogliamo confrontare.
     # LOGICA: Confrontare un modello a Fattori Latenti (Embedding) con uno a Neighborhood (Grafo/Simil)
     # Evitiamo di confrontare RP3beta con P3alpha (troppo simili)
     
