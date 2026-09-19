@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions & Cython build artifacts
+*.so
+*.c
+*.html
+
+# Data files & competition datasets (do not commit large matrices/CSVs)
+*.csv
+*.tsv
+*.parquet
+*.zip
+*.tar.gz
+*.h5
+*.hdf5
+
+# Optuna database & study logs
+*.db
+*.sqlite3
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# RecSys framework clones (downloaded dynamically in notebooks)
+RecSys_Course_AT_PoliMi/
