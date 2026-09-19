@@ -22,6 +22,12 @@ __pycache__/
 *.sqlite3
 *.log
 
+# Allow curated results and optimization logs
+!results/**/*.csv
+!results/**/*.log
+!results/**/*.txt
+!results/**/*.png
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
@@ -55,3 +61,4 @@ dist/
 
 # RecSys framework clones (downloaded dynamically in notebooks)
 RecSys_Course_AT_PoliMi/
+ROADMAP.md

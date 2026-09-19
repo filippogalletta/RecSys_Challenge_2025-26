@@ -111,12 +111,36 @@ The generated candidate pool is enriched with 70+ features across 6 distinct sig
 
 ---
 
+## Validation & Hyperparameter Optimization
+
+To ensure unbiased performance estimates and eliminate data leakage, we implemented a rigorous **5-Fold Cross-Validation** and **Out-Of-Fold (OOF)** optimization protocol:
+
+### 1. 5-Fold Interaction-Level Global Splitting
+Standard row-wise K-Fold creates artificial user cold-starts that distort collaborative filtering similarity matrices. Instead, we perform **global interaction sampling** on the sparse matrix (`split_train_in_five_percentage_global_sample`), creating 5 disjoint partitions (20% of interactions each). For fold $i$:
+* **$URM_{\text{train}}^{(i)}$**: $\sum_{j \neq i} URM_j$ (80% of all interactions)
+* **$URM_{\text{test}}^{(i)}$**: $URM_i$ (held-out 20% validation set)
+
+### 2. Out-Of-Fold (OOF) Training for XGBRanker
+A common pitfall in two-stage recommenders is computing Stage 2 features using a Stage 1 model trained on the same data used to label positives. To eliminate this target leakage:
+1. Candidate generation models (SLIM, EASE, RP3beta, iALS) are trained strictly on $URM_{\text{train}}^{(i)}$.
+2. Candidate lists (cutoff $K=50$) and 70+ tabular features are extracted using only information from $URM_{\text{train}}^{(i)}$.
+3. Ground-truth binary labels are assigned by matching candidates against positive interactions in $URM_{\text{test}}^{(i)}$.
+4. The ranker learns to discriminate true positives from false candidates without any feature over-estimation.
+
+### 3. Multi-Stage Bayesian Optimization (Optuna)
+* **Stage 1 (Hybrid Blending)**: Bayesian optimization tuned the convex similarity combination ($\alpha = 0.157, \beta = 0.088$) and latent factor blending ($\gamma = 0.127$) to maximize Recall@90.
+* **Stage 2 (XGBRanker)**: A 100-trial 5-Fold cross-validated Optuna study searched across tree structures (`max_depth`, `max_leaves`, `grow_policy`), regularization (`reg_alpha`, `reg_lambda`), and subsampling (`colsample_bytree`, `subsample`).
+  * **Top Result**: Trial 75 achieved **0.29576 MAP@20** across all validation holdouts.
+* For interactive code and optimization plots, see **[notebooks/03_KFold_and_Optuna_Tuning.ipynb](notebooks/03_KFold_and_Optuna_Tuning.ipynb)** and historical logs in **[results/](results/)**.
+
+---
+
 ## Feature Importance
 
 ![Feature Importance](assets/feature_importance.png)
 
 | Rank | Feature | Category | Importance (Weight) |
-| :---: | :--- | :--- | :---: |
+| :---: | :--- | :--- | :--- |
 | 1 | `SLIMElastic_Score` | Base Model Signal | 740.0 |
 | 2 | `EASE_R_Score` | Base Model Signal | 415.0 |
 | 3 | `IALS_Score` | Base Model Signal | 375.0 |
@@ -148,15 +172,22 @@ The generated candidate pool is enriched with 70+ features across 6 distinct sig
 ├── src/                                       # Modular Python package
 │   ├── __init__.py
 │   ├── candidate_generation.py                # M3 & M2 Hierarchical Hybrid Recommenders
+│   ├── cross_validation.py                    # 5-Fold interaction splitter & OOF evaluation
 │   ├── features.py                            # 70+ Feature extraction & RAM optimization
 │   ├── reranker.py                            # XGBoost reranker wrapper & submission generator
 │   └── models/
 │       ├── __init__.py
 │       ├── scaled_puresvd.py                  # Scaled PureSVD recommender
 │       └── implicit_als.py                    # Feature Combined Implicit ALS
-└── notebooks/
-    ├── 01_Candidate_Generation_Analysis.ipynb # Stage 1 retrieval & recall ceiling analysis
-    └── 02_Final_XGBoost_Pipeline.ipynb        # End-to-end reproducible pipeline
+├── notebooks/
+│   ├── 01_Candidate_Generation_Analysis.ipynb # Stage 1 retrieval & recall ceiling analysis
+│   ├── 02_Final_XGBoost_Pipeline.ipynb        # End-to-end reproducible pipeline
+│   └── 03_KFold_and_Optuna_Tuning.ipynb       # 5-Fold CV & Optuna Bayesian optimization
+└── results/                                   # Final optimization trials & technical narrative
+    ├── README.md                              # The engineering journey from baseline to 0.52522
+    ├── xgb_optuna_trials.txt                  # Final 100-trial Bayesian search log (MAP@20 = 0.29576)
+    ├── feature_importance.png                 # Final feature importance visualization
+    └── feature_importance_weights.txt         # Final quantitative feature rankings
 ```
 
 ---
