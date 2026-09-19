@@ -70,9 +70,9 @@ To maximize the theoretical **Recall Ceiling** without suffering from combinator
 
   $$W_{\text{final}} = (1 - \beta) W_{12} + \beta W_{\text{RP3}}$$
 
-* **Step 3 (Score-Level Blending)**: Linear combination of the custom neighborhood scores (`URM` $\cdot$ $W_{\text{final}}$) with **Implicit ALS (iALS)** latent factor ratings ($\gamma = 0.127$):
+* **Step 3 (Score-Level Blending)**: Linear combination of the custom neighborhood scores ($S_{\text{KNN}} = \text{URM} \cdot W_{\text{final}}$) with **Implicit ALS (iALS)** latent factor ratings ($\gamma = 0.127$):
 
-  $$\text{Final Score} = (1 - \gamma) \cdot \text{Score}_{\text{KNN}} + \gamma \cdot \text{Score}_{\text{iALS}}$$
+  $$S_{\text{final}} = (1 - \gamma) \cdot S_{\text{KNN}} + \gamma \cdot S_{\text{iALS}}$$
 
 * **Operating Point**: We select a compact cutoff of **90 candidates per user**, capturing **>85%** of all relevant validation interactions while keeping the training matrix below 2.5 million rows.
 * See detailed analysis in [notebooks/01_Candidate_Generation_Analysis.ipynb](notebooks/01_Candidate_Generation_Analysis.ipynb).
