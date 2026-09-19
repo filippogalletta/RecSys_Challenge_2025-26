@@ -62,12 +62,17 @@ Our solution is built on a scalable **Two-Stage Recommender System** architectur
 
 To maximize the theoretical **Recall Ceiling** without suffering from combinatorial feature explosion in the second stage, we engineered a multi-level **Hierarchical Hybrid Recommender (M3)**:
 
-1. **Similarity-Level Fusion (W12)**: Convex combination of the sparse item-item similarity matrices of **SLIM ElasticNet** and **EASE_R** ($\alpha = 0.157$):
-   $$W_{12} = (1 - \alpha) W_{SLIM} + \alpha W_{EASE}$$
-2. **Graph-Level Fusion (W_final)**: Blending $W_{12}$ with the 3-hop random walk transition matrix of **RP3beta** ($\beta = 0.088$):
-   $$W_{final} = (1 - \beta) W_{12} + \beta W_{RP3}$$
-3. **Score-Level Blending**: Linear combination of the custom neighborhood model ($URM \cdot W_{final}$) with **Implicit ALS (iALS)** latent factor ratings ($\gamma = 0.127$):
-   $$\text{Score} = (1 - \gamma) \cdot \text{Score}_{KNN} + \gamma \cdot \text{Score}_{iALS}$$
+* **Step 1 (Similarity-Level Fusion)**: Convex combination of the sparse item-item similarity matrices of **SLIM ElasticNet** and **EASE_R** ($\alpha = 0.157$):
+
+  $$W_{12} = (1 - \alpha) W_{\text{SLIM}} + \alpha W_{\text{EASE}}$$
+
+* **Step 2 (Graph-Level Fusion)**: Blending $W_{12}$ with the 3-hop random walk transition matrix of **RP3beta** ($\beta = 0.088$) into a unified neighborhood model:
+
+  $$W_{\text{final}} = (1 - \beta) W_{12} + \beta W_{\text{RP3}}$$
+
+* **Step 3 (Score-Level Blending)**: Linear combination of the custom neighborhood scores (`URM` $\cdot$ $W_{\text{final}}$) with **Implicit ALS (iALS)** latent factor ratings ($\gamma = 0.127$):
+
+  $$\text{Final Score} = (1 - \gamma) \cdot \text{Score}_{\text{KNN}} + \gamma \cdot \text{Score}_{\text{iALS}}$$
 
 * **Operating Point**: We select a compact cutoff of **90 candidates per user**, capturing **>85%** of all relevant validation interactions while keeping the training matrix below 2.5 million rows.
 * See detailed analysis in [notebooks/01_Candidate_Generation_Analysis.ipynb](notebooks/01_Candidate_Generation_Analysis.ipynb).
